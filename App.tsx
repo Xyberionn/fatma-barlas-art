@@ -9,57 +9,7 @@ import { supabase } from './src/supabaseClient';
 import { Artwork, BlogPost, AboutData, ViewState, Order } from './types';
 import * as api from './src/services/api';
 
-// --- Mock Initial Data ---
-const INITIAL_ARTWORKS: Artwork[] = [
-  {
-    id: '1',
-    title: 'Kyrie',
-    category: 'Köpek Portresi',
-    imageUrl: '/images/Portreler/Kyrie.jpg',
-    description: 'Renkli kalem çalışması, A4 boyutunda.',
-    date: '2022-10-15'
-  },
-  {
-    id: '2',
-    title: 'Max',
-    category: 'Köpek Portresi',
-    imageUrl: '/images/Portreler/max.jpg',
-    description: 'Karakalem detaylı çalışma.',
-    date: '2022-11-02'
-  },
-  {
-    id: '3',
-    title: 'Karamel',
-    category: 'Kedi Portresi',
-    imageUrl: '/images/Portreler/kedi.jpg',
-    description: 'Pastell boya ve kuru kalem.',
-    date: '2024-12-10'
-  }
-];
-
-const INITIAL_BLOGS: BlogPost[] = [
-  {
-    id: '1',
-    title: 'Sanat Eseri Bakım Kılavuzu',
-    excerpt: 'Eserinizi doğrudan güneş ışığından uzak tutun ve çerçeveletirken paspartu kullanmaya özen gösterin.',
-    content: `Sanatçı Fatma Barlas Özkavalcıoğlu tarafından yapılan sanat eseri, mevcut olan en yüksek kaliteli kalemler ve kağıt kullanılarak yaratılmıştır. Kağıt üzerine yaratılan sanat eserlerinin bakımı yapılırken, eserinizi korumak için işte birkaç nokta:
-    
-    1. Eserinizi doğrudan güneş ışığından uzak tutun. Uzun süre aşırı sıcağa veya güneş ışığına maruz kalırsa, kağıt kırılganlaşabilir.
-    2. Mümkünse sanat eserini UV güneş ışığından koruyan bir kaplama ile işlenmiş, parlama yapmayan (mat) camın altına çerçeveleyin.
-    3. Çerçevenizin paspartusu asitsiz kağıttan yapılmalı ve asitsiz bant ile tamamlanmalıdır.`,
-    date: '2023-09-20',
-    imageUrl: 'https://picsum.photos/800/400?random=4'
-  },
-  {
-    id: '2',
-    title: 'Neden Evcil Hayvan Portresi?',
-    excerpt: 'Sevimli dostlarımızı ölümsüzleştirmenin en sanat dolu yolu üzerine düşüncelerim.',
-    content: 'Evcil hayvanlarımız sadece birer hayvan değil, ailemizin en değerli üyeleridir. Onların o masum bakışlarını, karakteristik özelliklerini bir fotoğraftan alıp, el emeği ile bir sanat eserine dönüştürmek, onlara olan sevgimizi göstermenin en güzel yollarından biridir...',
-    date: '2024-01-15',
-    imageUrl: 'https://picsum.photos/800/400?random=5'
-  }
-];
-
+// --- Fallback Data (sadece about için - Supabase boşsa gösterilir) ---
 const INITIAL_ABOUT: AboutData = {
   title: "Yolculuğum",
   content: `1969 yılında memur bir ailenin ilk çocuğu olarak dünyaya geldim. Gaziantep Ticaret Lisesi mezunuyum. 2008 yılında Lösemi hastalığı ile zorlu mücadelem başladı ve yaklaşık 1,5 yıl sonra tamamen iyileştim. O zamana kadar kendim için bir şey yapmadığımı fark ettim. Sanırım kanserin en güzel tarafı, tek bir hayatım olduğunu ve onu öncelikle kendim için yaşamam gerektiğini öğretmesi oldu. İstanbul'a yerleştim, resim dersleri almaya başladım. 2 yıl eğitim aldım. Ardından 2,5 yıl kadar bir resim atölyesinde asistan olarak çalıştım. Resimle haşır neşirken birden neden çektiğim fotoğrafların resimlerini yapmıyorum? diye bir düşünceye kapıldım. Yeniden eğitim aldım ve fotoğrafçılıkla tanıştım. Bu tanışma, fotoğrafı çok sevmeme; profesyonel çekimler yapmama, ödüller kazanmama ve kişisel sergiler açmama kadar uzandı. Bu arada resmi de hiç bırakmadım. Elde ettiğim bu güzel başarıya rağmen, sağlık sebeplerinden dolayı fotoğrafçılığa devam edemedim. Resimle yoluma devam ettim, birçok teknik denedim ve en sonunda renkli kuru boya kalemlerle çalışmaya karar verdim. Hayvan portreleri yapmak, onlara olan minnettarlığımı sunmak gibi geliyor.`,
@@ -730,12 +680,12 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
         category: newArt.category || 'Diğer',
         imageUrl: newArt.imageUrl,
         description: newArt.description || '',
-        date: new Date().toISOString().split('T')[0]
+        date: newArt.date || new Date().toISOString().split('T')[0] // Kullanıcı girmezse bugünün tarihi
       };
 
       const createdArt = await api.createArtwork(art);
       setArtworks([createdArt, ...artworks]);
-      setNewArt({ title: '', category: 'Kedi Portresi', description: '', imageUrl: '' });
+      setNewArt({ title: '', category: 'Kedi Portresi', description: '', imageUrl: '', date: '' });
       alert('✅ Eser başarıyla eklendi!');
     } catch (error) {
       console.error('Eser eklenemedi:', error);
@@ -874,13 +824,23 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
                 <option>Köpek Portresi</option>
                 <option>Diğer</option>
               </select>
-              <textarea 
-                placeholder="Açıklama" 
+              <textarea
+                placeholder="Açıklama"
                 className="border p-3 rounded bg-white md:col-span-2"
                 rows={3}
                 value={newArt.description || ''}
                 onChange={e => setNewArt({...newArt, description: e.target.value})}
               />
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-600 mb-2 font-bold">Tamamlanma Tarihi (İsteğe Bağlı)</label>
+                <input
+                  type="date"
+                  className="border p-3 rounded bg-white w-full"
+                  value={newArt.date || ''}
+                  onChange={e => setNewArt({...newArt, date: e.target.value})}
+                />
+                <p className="text-xs text-gray-500 mt-1">Boş bırakırsanız bugünün tarihi kullanılır</p>
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm text-gray-600 mb-2 font-bold">Görsel Yükle</label>
                 <input type="file" className="block w-full text-sm text-slate-500
