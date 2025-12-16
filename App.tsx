@@ -486,7 +486,7 @@ const Contact: React.FC<{ onSubmit: (order: Order) => void }> = ({ onSubmit }) =
       phone: formData.phone,
       petType: formData.petType,
       message: formData.message,
-      date: new Date().toLocaleDateString('tr-TR')
+      date: new Date().toISOString().split('T')[0]
     };
 
     try {
@@ -513,7 +513,7 @@ const Contact: React.FC<{ onSubmit: (order: Order) => void }> = ({ onSubmit }) =
       petType: formData.petType,
       message: formData.message,
       photoUrl: formData.photoUrl,
-      date: new Date().toLocaleDateString('tr-TR')
+      date: new Date().toISOString().split('T')[0]
     };
 
     onSubmit(newOrder);
