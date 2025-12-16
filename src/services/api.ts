@@ -69,7 +69,7 @@ export const deleteArtwork = async (id: string): Promise<void> => {
 
 export const fetchBlogPosts = async (): Promise<BlogPost[]> => {
   const { data, error } = await supabase
-    .from('blog_posts')
+    .from('blogs')
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -90,7 +90,7 @@ export const fetchBlogPosts = async (): Promise<BlogPost[]> => {
 
 export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost> => {
   const { data, error } = await supabase
-    .from('blog_posts')
+    .from('blogs')
     .insert({
       title: post.title,
       excerpt: post.excerpt,
@@ -118,7 +118,7 @@ export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPo
 
 export const deleteBlogPost = async (id: string): Promise<void> => {
   const { error } = await supabase
-    .from('blog_posts')
+    .from('blogs')
     .delete()
     .eq('id', id);
 
@@ -132,7 +132,7 @@ export const deleteBlogPost = async (id: string): Promise<void> => {
 
 export const fetchAboutData = async (): Promise<AboutData | null> => {
   const { data, error } = await supabase
-    .from('about_data')
+    .from('about')
     .select('*')
     .limit(1)
     .single();
@@ -155,7 +155,7 @@ export const fetchAboutData = async (): Promise<AboutData | null> => {
 export const updateAboutData = async (aboutData: AboutData): Promise<AboutData> => {
   // Önce mevcut kaydı bul
   const { data: existingData } = await supabase
-    .from('about_data')
+    .from('about')
     .select('id')
     .limit(1)
     .single();
@@ -163,7 +163,7 @@ export const updateAboutData = async (aboutData: AboutData): Promise<AboutData> 
   if (existingData) {
     // Güncelle
     const { data, error } = await supabase
-      .from('about_data')
+      .from('about')
       .update({
         title: aboutData.title,
         content: aboutData.content,
@@ -189,7 +189,7 @@ export const updateAboutData = async (aboutData: AboutData): Promise<AboutData> 
   } else {
     // Yeni kayıt oluştur
     const { data, error } = await supabase
-      .from('about_data')
+      .from('about')
       .insert({
         title: aboutData.title,
         content: aboutData.content,
