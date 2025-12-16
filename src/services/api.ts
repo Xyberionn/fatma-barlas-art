@@ -229,6 +229,8 @@ export const fetchOrders = async (): Promise<Order[]> => {
   return (data || []).map((item: any) => ({
     id: item.id,
     name: item.name,
+    email: item.email,
+    phone: item.phone,
     petType: item.pet_type,
     message: item.message,
     photoUrl: item.photo_url,
@@ -241,6 +243,8 @@ export const createOrder = async (order: Omit<Order, 'id'>): Promise<Order> => {
     .from('orders')
     .insert({
       name: order.name,
+      email: order.email,
+      phone: order.phone,
       pet_type: order.petType,
       message: order.message,
       photo_url: order.photoUrl,
@@ -257,6 +261,8 @@ export const createOrder = async (order: Omit<Order, 'id'>): Promise<Order> => {
   return {
     id: data.id,
     name: data.name,
+    email: data.email,
+    phone: data.phone,
     petType: data.pet_type,
     message: data.message,
     photoUrl: data.photo_url,

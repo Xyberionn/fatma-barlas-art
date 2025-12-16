@@ -504,15 +504,16 @@ const Contact: React.FC<{ onSubmit: (order: Order) => void }> = ({ onSubmit }) =
       alert('Sipariş kaydedildi ama email gönderilemedi. Lütfen direkt iletişime geçin.');
     }
 
-    // LocalStorage'a sadece hassas OLMAYAN bilgileri kaydet
+    // Sipariş objesi oluştur (Supabase'e kaydedilecek)
     const newOrder: Order = {
       id: Date.now().toString(),
       name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
       petType: formData.petType,
       message: formData.message,
       photoUrl: formData.photoUrl,
       date: new Date().toLocaleDateString('tr-TR')
-      // email ve phone KAYDETME - sadece email'e gönderildi
     };
 
     onSubmit(newOrder);
@@ -1072,11 +1073,15 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
                            <div className="flex items-center gap-2">
                              <span className="font-bold">Tarih:</span> {order.date}
                            </div>
-                           <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-xs">
-                             <p className="text-blue-800">
-                               <Mail size={14} className="inline mr-1" />
-                               İletişim bilgileri (email & telefon) güvenlik için email'inize gönderildi.
-                             </p>
+                           <div className="flex items-center gap-2">
+                             <Mail size={14} />
+                             <span className="font-bold">Email:</span>
+                             <a href={`mailto:${order.email}`} className="text-blue-600 hover:underline">{order.email}</a>
+                           </div>
+                           <div className="flex items-center gap-2">
+                             <Phone size={14} />
+                             <span className="font-bold">Telefon:</span>
+                             <a href={`tel:${order.phone}`} className="text-blue-600 hover:underline">{order.phone}</a>
                            </div>
                         </div>
                         

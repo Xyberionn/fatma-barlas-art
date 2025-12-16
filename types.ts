@@ -26,11 +26,12 @@ export interface AboutData {
 export interface Order {
   id: string;
   name: string;
+  email: string;
+  phone: string;
   petType: string;
   message: string;
   photoUrl: string; // Base64 string for the uploaded reference photo
   date: string;
-  // email ve phone sadece email'e gönderilir, localStorage'da tutulmaz
 }
 
 export interface UserUser {
