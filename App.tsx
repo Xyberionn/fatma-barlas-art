@@ -259,7 +259,7 @@ const AchievementsSection: React.FC = () => {
            <div className="space-y-5 font-serif text-ink/70 leading-relaxed">
              <div className="border-l-4 border-gold pl-6 py-2">
                <h3 className="font-bold text-lg text-ink mb-2">Uluslararası Başarılar</h3>
-               <p className="text-base">Anadolu Sigorta Fotoğraf Yarışması 3'üncülük Ödülü Bronz Madalya. Los Angeles'da düzenlenen ve dünya çapında 40.000 fotoğrafçı arasında ilk üçe girdim ve fotoğraflarım sergi afişi olarak kullanıldı.</p>
+               <p className="text-base">Anadolu Sigorta Fotoğraf Yarışması 3'üncülük Ödülü Bronz Madalya. Los Angeles'da düzenlenen ve dünya çapında 40.000 fotoğrafçı katılımı ile gerçekleşen yarışmada ilk üçe girdim ve fotoğraflarım sergi afişi olarak kullanıldı.</p>
              </div>
 
              <div className="border-l-4 border-gold pl-6 py-2">
