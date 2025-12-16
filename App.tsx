@@ -1215,18 +1215,17 @@ function App() {
           api.fetchOrders().catch(() => []) // Orders sadece authenticated kullanıcılar görebilir
         ]);
 
-        setArtworks(artworksData.length > 0 ? artworksData : INITIAL_ARTWORKS);
-        setBlogs(blogsData.length > 0 ? blogsData : INITIAL_BLOGS);
+        // Supabase'den gelen veriyi olduğu gibi kullan (boş bile olsa)
+        setArtworks(artworksData);
+        setBlogs(blogsData);
         setAboutData(aboutDataResult || INITIAL_ABOUT);
         setOrders(ordersData);
 
         console.log('✅ Veriler Supabase\'den yüklendi');
       } catch (error) {
         console.error('Veri yükleme hatası:', error);
-        // Hata durumunda varsayılan verileri kullan
-        setArtworks(INITIAL_ARTWORKS);
-        setBlogs(INITIAL_BLOGS);
-        setAboutData(INITIAL_ABOUT);
+        // Hata durumunda boş state bırak - INITIAL değerleri kullanma!
+        alert('Veriler yüklenirken hata oluştu. Lütfen sayfayı yenileyin.');
       } finally {
         setLoading(false);
       }
