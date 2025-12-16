@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS public.about_data (
 CREATE TABLE IF NOT EXISTS public.orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
   pet_type TEXT NOT NULL,
   message TEXT NOT NULL,
   photo_url TEXT NOT NULL,

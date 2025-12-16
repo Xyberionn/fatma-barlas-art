@@ -552,7 +552,7 @@ const Contact: React.FC<{ onSubmit: (order: Order) => void }> = ({ onSubmit }) =
                </div>
                <div>
                  <h4 className="font-sans font-bold text-ink uppercase text-sm tracking-wider mb-1">Instagram</h4>
-                 <p className="font-serif text-lg text-ink/80">@fatmabarlasart</p>
+                 <a href="https://www.instagram.com/fatmabarlasart" target="_blank" rel="noopener noreferrer" className="font-serif text-lg text-ink/80 hover:text-gold transition-colors">@fatmabarlasart</a>
                </div>
              </div>
            </div>
@@ -1379,7 +1379,7 @@ function App() {
           
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="flex gap-6">
-               <a href="#" className="text-ink/40 hover:text-gold transition-colors"><Instagram size={20} /></a>
+               <a href="https://www.instagram.com/fatmabarlasart" target="_blank" rel="noopener noreferrer" className="text-ink/40 hover:text-gold transition-colors"><Instagram size={20} /></a>
                <a href="mailto:barlasfatma34@gmail.com" className="text-ink/40 hover:text-gold transition-colors"><Mail size={20} /></a>
                <button onClick={() => setShowLogin(true)} className="text-ink/40 hover:text-gold transition-colors opacity-0 hover:opacity-100">
                  <Lock size={20} />
