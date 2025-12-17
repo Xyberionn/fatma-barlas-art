@@ -17,6 +17,21 @@ const INITIAL_ABOUT: AboutData = {
   image2: "https://picsum.photos/600/600?random=11"
 };
 
+// --- Utility Functions ---
+
+// Türkçe tarih formatı: "17 Aralık 2025"
+const formatTurkishDate = (dateStr: string): string => {
+  const months = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+  ];
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} ${month} ${year}`;
+};
+
 // --- Sub-components ---
 
 // 1. Modern Clean Frame
@@ -301,7 +316,7 @@ const Gallery: React.FC<{ items: Artwork[] }> = ({ items }) => {
               <h3 className="font-serif text-4xl text-ink mb-6">{selectedImage.title}</h3>
               <p className="font-serif text-lg text-ink/70 leading-relaxed mb-6">{selectedImage.description}</p>
               <div className="mt-auto border-t border-ink/10 pt-6">
-                <p className="font-sans text-sm text-ink/40">Tamamlanma Tarihi: {selectedImage.date}</p>
+                <p className="font-sans text-sm text-ink/40">Tamamlanma Tarihi: {formatTurkishDate(selectedImage.date)}</p>
               </div>
             </div>
           </div>
@@ -337,7 +352,7 @@ const Blog: React.FC<{
             )}
             <div className="flex-1 p-8 md:p-12 flex flex-col justify-center">
               <div className="flex items-center gap-3 text-gold font-sans text-xs uppercase tracking-wider mb-4">
-                <span>{post.date}</span>
+                <span>{formatTurkishDate(post.date)}</span>
                 <span className="w-1 h-1 rounded-full bg-gold"></span>
                 <span>Blog</span>
               </div>
@@ -374,7 +389,7 @@ const BlogDetail: React.FC<{ post: BlogPost; onBack: () => void }> = ({ post, on
       
       <ContentCard>
         <div className="text-center mb-10">
-           <span className="text-gold font-sans text-sm tracking-widest uppercase block mb-4">{post.date}</span>
+           <span className="text-gold font-sans text-sm tracking-widest uppercase block mb-4">{formatTurkishDate(post.date)}</span>
            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-ink leading-tight">{post.title}</h1>
         </div>
 
@@ -1031,7 +1046,7 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
                         
                         <div className="grid grid-cols-1 gap-4 text-sm text-gray-600 border-b border-gray-100 pb-4">
                            <div className="flex items-center gap-2">
-                             <span className="font-bold">Tarih:</span> {order.date}
+                             <span className="font-bold">Tarih:</span> {formatTurkishDate(order.date)}
                            </div>
                            <div className="flex items-center gap-2">
                              <Mail size={14} />
