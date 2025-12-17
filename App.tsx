@@ -213,7 +213,7 @@ const AboutSection: React.FC<{ data: AboutData }> = ({ data }) => {
 };
 
 // 3.6 Achievements Section
-const AchievementsSection: React.FC = () => {
+const AchievementsSection: React.FC<{ achievementsData: AchievementsData }> = ({ achievementsData }) => {
   return (
     <section className="max-w-7xl mx-auto px-6 py-24 border-b border-ink/5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -1330,7 +1330,7 @@ function App() {
             <AboutSection data={aboutData} />
 
             {/* Achievements Section */}
-            <AchievementsSection />
+            <AchievementsSection achievementsData={achievementsData} />
 
             {/* Featured Section */}
             <div className="max-w-7xl mx-auto px-6 py-20 pt-10">
