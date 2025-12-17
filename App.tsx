@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { supabase } from './src/supabaseClient';
-import { Artwork, BlogPost, AboutData, ViewState, Order } from './types';
+import { Artwork, BlogPost, AboutData, AchievementsData, ViewState, Order } from './types';
 import * as api from './src/services/api';
 
 // --- Fallback Data (sadece about için - Supabase boşsa gösterilir) ---
@@ -15,6 +15,10 @@ const INITIAL_ABOUT: AboutData = {
   content: `1969 yılında memur bir ailenin ilk çocuğu olarak dünyaya geldim. Gaziantep Ticaret Lisesi mezunuyum. 2008 yılında Lösemi hastalığı ile zorlu mücadelem başladı ve yaklaşık 1,5 yıl sonra tamamen iyileştim. O zamana kadar kendim için bir şey yapmadığımı fark ettim. Sanırım kanserin en güzel tarafı, tek bir hayatım olduğunu ve onu öncelikle kendim için yaşamam gerektiğini öğretmesi oldu. İstanbul'a yerleştim, resim dersleri almaya başladım. 2 yıl eğitim aldım. Ardından 2,5 yıl kadar bir resim atölyesinde asistan olarak çalıştım. Resimle haşır neşirken birden neden çektiğim fotoğrafların resimlerini yapmıyorum? diye bir düşünceye kapıldım. Yeniden eğitim aldım ve fotoğrafçılıkla tanıştım. Bu tanışma, fotoğrafı çok sevmeme; profesyonel çekimler yapmama, ödüller kazanmama ve kişisel sergiler açmama kadar uzandı. Bu arada resmi de hiç bırakmadım. Elde ettiğim bu güzel başarıya rağmen, sağlık sebeplerinden dolayı fotoğrafçılığa devam edemedim. Resimle yoluma devam ettim, birçok teknik denedim ve en sonunda renkli kuru boya kalemlerle çalışmaya karar verdim. Hayvan portreleri yapmak, onlara olan minnettarlığımı sunmak gibi geliyor.`,
   image1: "https://picsum.photos/600/800?random=10",
   image2: "https://picsum.photos/600/600?random=11"
+};
+
+const INITIAL_ACHIEVEMENTS: AchievementsData = {
+  image: "https://picsum.photos/450/600?random=20"
 };
 
 // --- Utility Functions ---
@@ -248,7 +252,7 @@ const AchievementsSection: React.FC = () => {
         <div className="fade-in-up order-1 md:order-2 max-w-md mx-auto">
            <div className="relative aspect-[3/4] shadow-2xl overflow-hidden bg-gray-200">
              <img
-               src="https://picsum.photos/450/600?random=20"
+               src={achievementsData.image}
                alt="Başarılarım"
                className="w-full h-full object-cover"
              />
@@ -666,13 +670,18 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
   
   // Local state for About form to allow editing before saving
   const [aboutForm, setAboutForm] = useState<AboutData>(aboutData);
+  const [achievementsForm, setAchievementsForm] = useState<AchievementsData>(achievementsData);
 
   // Sync about form if prop changes
   useEffect(() => {
     setAboutForm(aboutData);
   }, [aboutData]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'ART' | 'BLOG' | 'ABOUT_1' | 'ABOUT_2') => {
+  useEffect(() => {
+    setAchievementsForm(achievementsData);
+  }, [achievementsData]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'ART' | 'BLOG' | 'ABOUT_1' | 'ABOUT_2' | 'ACHIEVEMENTS') => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -681,6 +690,7 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
         else if (type === 'BLOG') setNewBlog({ ...newBlog, imageUrl: reader.result as string });
         else if (type === 'ABOUT_1') setAboutForm({ ...aboutForm, image1: reader.result as string });
         else if (type === 'ABOUT_2') setAboutForm({ ...aboutForm, image2: reader.result as string });
+        else if (type === 'ACHIEVEMENTS') setAchievementsForm({ image: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -776,6 +786,17 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
       alert("✅ Hakkında bölümü güncellendi!");
     } catch (error) {
       console.error('Hakkında güncellenemedi:', error);
+      alert('❌ Güncellenemedi. Lütfen tekrar deneyin.');
+    }
+  }
+
+  const saveAchievements = async () => {
+    try {
+      const updatedAchievements = await api.updateAchievementsData(achievementsForm);
+      setAchievementsData(updatedAchievements);
+      alert("✅ Başarılar fotoğrafı güncellendi!");
+    } catch (error) {
+      console.error('Başarılar fotoğrafı güncellenemedi:', error);
       alert('❌ Güncellenemedi. Lütfen tekrar deneyin.');
     }
   }
@@ -1003,6 +1024,37 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
                   </button>
                 </div>
              </div>
+
+             {/* Başarılar Fotoğrafı */}
+             <div className="mt-12 pt-12 border-t-2 border-ink/10">
+               <h3 className="font-serif text-xl mb-6 font-bold text-gold uppercase tracking-widest text-xs">Başarılar Fotoğrafı</h3>
+               <div className="grid grid-cols-1 gap-6">
+                 <div>
+                   <label className="block text-sm text-gray-600 mb-2 font-bold">Başarılar Bölümü Fotoğrafı (Dikey önerilir)</label>
+                   {achievementsForm.image && (
+                     <img src={achievementsForm.image} className="h-64 object-cover mb-4 rounded border shadow-md" alt="Başarılar" />
+                   )}
+                   <input
+                     type="file"
+                     className="block w-full text-sm text-slate-500
+                       file:mr-4 file:py-2 file:px-4
+                       file:rounded-full file:border-0
+                       file:text-sm file:font-semibold
+                       file:bg-gold/10 file:text-gold
+                       hover:file:bg-gold/20
+                     "
+                     accept="image/*"
+                     onChange={(e) => handleImageUpload(e, 'ACHIEVEMENTS')}
+                   />
+                 </div>
+
+                 <div className="text-right pt-6 border-t border-ink/5">
+                   <button onClick={saveAchievements} className="bg-ink text-white px-8 py-3 rounded hover:bg-gold transition-colors flex items-center gap-2 ml-auto shadow-lg">
+                     <Save size={18} /> Başarılar Fotoğrafını Kaydet
+                   </button>
+                 </div>
+               </div>
+             </div>
           </div>
         )}
 
@@ -1174,6 +1226,7 @@ function App() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [aboutData, setAboutData] = useState<AboutData>(INITIAL_ABOUT);
+  const [achievementsData, setAchievementsData] = useState<AchievementsData>(INITIAL_ACHIEVEMENTS);
   const [orders, setOrders] = useState<Order[]>([]);
 
   // Supabase'den veri yükleme
@@ -1183,10 +1236,11 @@ function App() {
         setLoading(true);
 
         // Paralel olarak tüm verileri çek
-        const [artworksData, blogsData, aboutDataResult, ordersData] = await Promise.all([
+        const [artworksData, blogsData, aboutDataResult, achievementsDataResult, ordersData] = await Promise.all([
           api.fetchArtworks(),
           api.fetchBlogPosts(),
           api.fetchAboutData(),
+          api.fetchAchievementsData(),
           api.fetchOrders().catch(() => []) // Orders sadece authenticated kullanıcılar görebilir
         ]);
 
@@ -1194,6 +1248,7 @@ function App() {
         setArtworks(artworksData);
         setBlogs(blogsData);
         setAboutData(aboutDataResult || INITIAL_ABOUT);
+        setAchievementsData(achievementsDataResult || INITIAL_ACHIEVEMENTS);
         setOrders(ordersData);
 
         console.log('✅ Veriler Supabase\'den yüklendi');

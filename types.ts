@@ -23,6 +23,10 @@ export interface AboutData {
   image2: string;
 }
 
+export interface AchievementsData {
+  image: string;
+}
+
 export interface Order {
   id: string;
   name: string;

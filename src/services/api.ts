@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import { Artwork, BlogPost, AboutData, Order } from '../../types';
+import { Artwork, BlogPost, AboutData, AchievementsData, Order } from '../../types';
 
 // ==================== ARTWORKS ====================
 
@@ -318,5 +318,75 @@ export const deleteImage = async (url: string, bucket: string = 'artworks'): Pro
   if (error) {
     console.error('Error deleting image:', error);
     throw error;
+  }
+};
+
+// ==================== ACHIEVEMENTS DATA ====================
+
+export const fetchAchievementsData = async (): Promise<AchievementsData | null> => {
+  const { data, error } = await supabase
+    .from('achievements')
+    .select('*')
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Error fetching achievements data:', error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    image: data.image
+  };
+};
+
+export const updateAchievementsData = async (achievementsData: AchievementsData): Promise<AchievementsData> => {
+  // Önce mevcut kaydı bul
+  const { data: existingData } = await supabase
+    .from('achievements')
+    .select('id')
+    .limit(1)
+    .single();
+
+  if (existingData) {
+    // Güncelle
+    const { data, error } = await supabase
+      .from('achievements')
+      .update({
+        image: achievementsData.image,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingData.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating achievements data:', error);
+      throw error;
+    }
+
+    return {
+      image: data.image
+    };
+  } else {
+    // Yeni kayıt oluştur
+    const { data, error } = await supabase
+      .from('achievements')
+      .insert({
+        image: achievementsData.image
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating achievements data:', error);
+      throw error;
+    }
+
+    return {
+      image: data.image
+    };
   }
 };
