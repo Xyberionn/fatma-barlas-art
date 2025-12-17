@@ -658,12 +658,14 @@ interface AdminProps {
   setBlogs: React.Dispatch<React.SetStateAction<BlogPost[]>>;
   aboutData: AboutData;
   setAboutData: React.Dispatch<React.SetStateAction<AboutData>>;
+  achievementsData: AchievementsData;
+  setAchievementsData: React.Dispatch<React.SetStateAction<AchievementsData>>;
   orders: Order[];
   setOrders: React.Dispatch<React.SetStateAction<Order[]>>;
   onLogout: () => void;
 }
 
-const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, aboutData, setAboutData, orders, setOrders, onLogout }) => {
+const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, aboutData, setAboutData, achievementsData, setAchievementsData, orders, setOrders, onLogout }) => {
   const [activeTab, setActiveTab] = useState<'GALLERY' | 'BLOG' | 'ABOUT' | 'ORDERS'>('GALLERY');
   const [newArt, setNewArt] = useState<Partial<Artwork>>({ category: 'Kedi Portresi' });
   const [newBlog, setNewBlog] = useState<Partial<BlogPost>>({});
@@ -1382,13 +1384,15 @@ function App() {
 
         {view === 'ADMIN' && (
           <div className="animate-fade-in">
-            <Admin 
-              artworks={artworks} 
+            <Admin
+              artworks={artworks}
               setArtworks={setArtworks}
               blogs={blogs}
               setBlogs={setBlogs}
               aboutData={aboutData}
               setAboutData={setAboutData}
+              achievementsData={achievementsData}
+              setAchievementsData={setAchievementsData}
               orders={orders}
               setOrders={setOrders}
               onLogout={() => { setIsAdmin(false); handleNav('HOME'); }}
