@@ -84,6 +84,10 @@ export const fetchBlogPosts = async (): Promise<BlogPost[]> => {
     excerpt: item.excerpt,
     content: item.content,
     imageUrl: item.image_url,
+    // Backward compatibility: if images array exists, use it; otherwise convert imageUrl to array
+    images: item.images && item.images.length > 0
+      ? item.images
+      : (item.image_url ? [item.image_url] : []),
     date: item.date
   }));
 };
@@ -95,7 +99,8 @@ export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPo
       title: post.title,
       excerpt: post.excerpt,
       content: post.content,
-      image_url: post.imageUrl,
+      image_url: post.images && post.images.length > 0 ? post.images[0] : post.imageUrl, // Keep first image in legacy field
+      images: post.images, // New: store all images in array
       date: post.date
     })
     .select()
@@ -112,6 +117,9 @@ export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPo
     excerpt: data.excerpt,
     content: data.content,
     imageUrl: data.image_url,
+    images: data.images && data.images.length > 0
+      ? data.images
+      : (data.image_url ? [data.image_url] : []),
     date: data.date
   };
 };

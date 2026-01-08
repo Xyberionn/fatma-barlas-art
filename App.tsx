@@ -8,6 +8,7 @@ import emailjs from '@emailjs/browser';
 import { supabase } from './src/supabaseClient';
 import { Artwork, BlogPost, AboutData, AchievementsData, ViewState, Order } from './types';
 import * as api from './src/services/api';
+import { BlogCarousel } from './src/components/BlogCarousel';
 
 // --- Fallback Data (sadece about için - Supabase boşsa gösterilir) ---
 const INITIAL_ABOUT: AboutData = {
@@ -382,31 +383,31 @@ const Blog: React.FC<{
 
 // 6. Blog Detail
 const BlogDetail: React.FC<{ post: BlogPost; onBack: () => void }> = ({ post, onBack }) => {
+  // Use images array if available, fallback to imageUrl for backward compatibility
+  const postImages = post.images && post.images.length > 0 ? post.images : (post.imageUrl ? [post.imageUrl] : []);
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in-down">
-      <button 
+      <button
         onClick={onBack}
         className="mb-8 flex items-center text-ink/50 hover:text-gold transition-colors font-sans text-sm tracking-wide uppercase"
       >
         <ChevronRight className="transform rotate-180 mr-1" size={16} /> Blog Listesine Dön
       </button>
-      
+
       <ContentCard>
         <div className="text-center mb-10">
            <span className="text-gold font-sans text-sm tracking-widest uppercase block mb-4">{formatTurkishDate(post.date)}</span>
            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-ink leading-tight">{post.title}</h1>
         </div>
 
-        {post.imageUrl && (
-          <div className="w-full aspect-video mb-12 shadow-sm">
-            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
-          </div>
-        )}
-        
+        {/* Use Carousel for multiple images, or single image display */}
+        {postImages.length > 0 && <BlogCarousel images={postImages} />}
+
         <div className="prose prose-lg prose-stone font-serif mx-auto text-ink/80 whitespace-pre-wrap leading-loose">
           {post.content}
         </div>
-        
+
         <div className="mt-16 pt-12 border-t border-ink/5 flex items-center justify-center">
            <span className="font-script text-3xl text-ink/40">Fatma Barlas Özkavalcıoğlu</span>
         </div>
@@ -698,6 +699,49 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
     }
   };
 
+  // Multi-image upload handler for blog posts
+  const handleBlogImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const currentImages = newBlog.images || [];
+    const remainingSlots = 5 - currentImages.length;
+
+    if (remainingSlots === 0) {
+      alert('Maksimum 5 fotoğraf ekleyebilirsiniz');
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+
+    if (files.length > remainingSlots) {
+      alert(`Maksimum ${remainingSlots} fotoğraf daha ekleyebilirsiniz`);
+    }
+
+    try {
+      // Upload to Supabase Storage
+      const uploadPromises = filesToUpload.map(file => api.uploadImage(file, 'artworks'));
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      setNewBlog({
+        ...newBlog,
+        images: [...currentImages, ...uploadedUrls]
+      });
+    } catch (error) {
+      console.error('Fotoğraflar yüklenemedi:', error);
+      alert('❌ Fotoğraflar yüklenemedi. Lütfen tekrar deneyin.');
+    }
+  };
+
+  // Remove image from blog post
+  const removeBlogImage = (index: number) => {
+    const currentImages = newBlog.images || [];
+    setNewBlog({
+      ...newBlog,
+      images: currentImages.filter((_, i) => i !== index)
+    });
+  };
+
   const addArtwork = async () => {
     if (!newArt.title || !newArt.imageUrl) return alert('Lütfen başlık ve görsel ekleyin');
 
@@ -736,18 +780,22 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
   const addBlog = async () => {
     if (!newBlog.title || !newBlog.content) return alert('Başlık ve içerik zorunludur');
 
+    const blogImages = newBlog.images || [];
+    if (blogImages.length === 0) return alert('En az 1 fotoğraf eklemelisiniz');
+
     try {
       const blog: Omit<BlogPost, 'id'> = {
         title: newBlog.title,
         excerpt: newBlog.excerpt || newBlog.content.substring(0, 100) + '...',
         content: newBlog.content,
         date: new Date().toISOString().split('T')[0],
-        imageUrl: newBlog.imageUrl
+        imageUrl: blogImages[0], // Legacy field: keep first image
+        images: blogImages
       };
 
       const createdBlog = await api.createBlogPost(blog);
       setBlogs([createdBlog, ...blogs]);
-      setNewBlog({ title: '', excerpt: '', content: '', imageUrl: '' });
+      setNewBlog({ title: '', excerpt: '', content: '', images: [] });
       alert('✅ Blog yazısı eklendi!');
     } catch (error) {
       console.error('Blog eklenemedi:', error);
@@ -944,14 +992,58 @@ const Admin: React.FC<AdminProps> = ({ artworks, setArtworks, blogs, setBlogs, a
                 onChange={e => setNewBlog({...newBlog, content: e.target.value})}
               />
               <div>
-                <label className="block text-sm text-gray-600 mb-2 font-bold">Kapak Görseli</label>
-                <input type="file" className="block w-full text-sm text-slate-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-gold/10 file:text-gold
-                  hover:file:bg-gold/20
-                " accept="image/*" onChange={(e) => handleImageUpload(e, 'BLOG')} />
+                <label className="block text-sm text-gray-600 mb-2 font-bold">
+                  Fotoğraflar (Min 1, Max 5) - Yükleme sırasına göre gösterilir
+                </label>
+
+                {/* Image Previews */}
+                {newBlog.images && newBlog.images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                    {newBlog.images.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded border-2 border-gray-200"
+                        />
+                        <div className="absolute top-1 left-1 bg-gold text-white text-xs px-2 py-1 rounded">
+                          {index + 1}
+                        </div>
+                        <button
+                          onClick={() => removeBlogImage(index)}
+                          className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                {(!newBlog.images || newBlog.images.length < 5) && (
+                  <input
+                    type="file"
+                    multiple
+                    className="block w-full text-sm text-slate-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-gold/10 file:text-gold
+                      hover:file:bg-gold/20
+                    "
+                    accept="image/*"
+                    onChange={handleBlogImagesUpload}
+                  />
+                )}
+
+                <p className="text-xs text-gray-500 mt-2">
+                  {newBlog.images?.length || 0} / 5 fotoğraf yüklendi
+                </p>
               </div>
               <div className="text-right">
                 <button onClick={addBlog} className="bg-ink text-white px-6 py-3 rounded hover:bg-gold transition-colors flex items-center gap-2 ml-auto">

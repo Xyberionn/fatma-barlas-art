@@ -13,7 +13,8 @@ export interface BlogPost {
   excerpt: string;
   content: string;
   date: string;
-  imageUrl?: string;
+  imageUrl?: string; // Legacy: single image (kept for backward compatibility)
+  images?: string[];  // New: array of image URLs (max 5)
 }
 
 export interface AboutData {
